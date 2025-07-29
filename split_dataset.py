@@ -1,6 +1,7 @@
 """Normalize and split the dataset into individual files.
 
-This script removes sprite data, replaces numeric ID references with names,
+This script removes sprite data, replaces numeric ID references with names
+and species keys,
 and writes each top-level section of the input file to its own JavaScript file.
 An index.json mapping keys to file paths is generated for convenience.
 """
@@ -32,7 +33,10 @@ def build_lookup_tables(data):
     egg_map = {int(eid): name for eid, name in data.get('eggGroups', {}).items()}
     tm_lookup = data.get('tmMoves', {})
     tutor_lookup = data.get('tutorMoves', {})
-    species_map = {int(sid): mon.get('name', sid) for sid, mon in data.get('species', {}).items()}
+    species_map = {
+        int(sid): mon.get('key') or mon.get('name', sid)
+        for sid, mon in data.get('species', {}).items()
+    }
     type_map = {int(tid): t.get('name', tid) for tid, t in data.get('types', {}).items()}
     item_map = {int(iid): item.get('name', iid) for iid, item in data.get('items', {}).items()}
     nature_map = {int(nid): name for nid, name in data.get('natures', {}).items()}
