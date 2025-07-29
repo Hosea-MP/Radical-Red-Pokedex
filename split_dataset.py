@@ -4,7 +4,10 @@ This script removes sprite data and converts numeric ID references to
 human-readable forms. Species IDs are replaced with their key value
 where available so trainers and areas reference Pokémon by key.
 Trainer and item references in areas are also replaced with their
-corresponding names.
+corresponding names. Raid dens use names for their Pokémon and reward
+items as well. When ``--expand-evolutions`` is used each evolution entry
+includes the resolved descriptive text in addition to its numeric
+parameters.
 Each top-level section of the input file is then written to its own
 JavaScript file.
 An index.json mapping keys to file paths is generated for convenience.
@@ -14,6 +17,35 @@ import ast
 import os
 import json
 import argparse
+import re
+
+
+def format_evo_text(method_id, evo, templates):
+    """Return the descriptive text for an evolution."""
+    template = templates.get(method_id, '')
+    text = template.strip('`')
+    if not text:
+        return ''
+    if method_id == 7:
+        suffix = '' if evo[1] != 'Dawn Stone' else (
+            ' (Female)' if evo[3] == 254 else ' (Male)'
+        )
+        return f"with a {evo[1]}{suffix}"
+    if method_id == 28:
+        if evo[3] == 1041:
+            time = '(Day)'
+        elif evo[3] == 5144:
+            time = '(Night)'
+        else:
+            time = '(Dusk)'
+        return f"at Level {evo[1]} {time}"
+    if method_id == 254:
+        arg = 'move ' + evo[1] if len(evo) > 3 and evo[3] == 2 else evo[1]
+        return f"with the {arg}"
+    def repl(match):
+        idx = int(match.group(1))
+        return str(evo[idx]) if idx < len(evo) else ''
+    return re.sub(r"\$\{evo\[(\d+)\]\}", repl, text)
 
 
 def remove_sprites(obj):
@@ -62,7 +94,7 @@ def build_lookup_tables(data):
     )
 
 
-def replace_ids(data):
+def replace_ids(data, expand_evos=False):
     (
         move_map,
         ability_map,
@@ -99,9 +131,28 @@ def replace_ids(data):
         if 'evolutions' in mon:
             converted = []
             for evo in mon['evolutions']:
+                evo = list(evo)
                 if len(evo) >= 3:
-                    evo = list(evo)
                     evo[2] = species_map.get(evo[2], evo[2])
+                method = evo[0]
+                if method == 7:
+                    evo[1] = item_map.get(evo[1], evo[1])
+                elif method == 17:
+                    evo[1] = type_map.get(evo[1], evo[1])
+                elif method == 18 and len(evo) > 3:
+                    evo[3] = type_map.get(evo[3], evo[3])
+                elif method == 26:
+                    evo[1] = move_map.get(evo[1], evo[1])
+                elif method == 27:
+                    evo[1] = species_map.get(evo[1], evo[1])
+                elif method == 254:
+                    if len(evo) > 3 and evo[3] == 2:
+                        evo[1] = move_map.get(evo[1], evo[1])
+                    else:
+                        evo[1] = item_map.get(evo[1], evo[1])
+                if expand_evos:
+                    text = format_evo_text(method, evo, data.get('evolutions', {}))
+                    evo.append(text)
                 converted.append(evo)
             mon['evolutions'] = converted
 
@@ -155,6 +206,25 @@ def replace_ids(data):
             if key.startswith('item-'):
                 for slot, items in area[key].items():
                     area[key][slot] = [item_map.get(iid, iid) for iid in items]
+            elif re.fullmatch(r"raid\d+", key):
+                for slot, entries in area[key].items():
+                    converted = []
+                    for mon_id, rewards in entries:
+                        mon_name = species_map.get(mon_id, mon_id)
+                        reward_names = [item_map.get(rid, rid) for rid in rewards]
+                        converted.append([mon_name, reward_names])
+                    area[key][slot] = converted
+
+    dawn_name = item_map.get(101, 'Dawn Stone')
+    for mid, template in data.get('evolutions', {}).items():
+        template = template.replace("items[evo[1]].name", "evo[1]")
+        template = template.replace("moves[evo[1]].name", "evo[1]")
+        template = template.replace("types[evo[1]].name", "evo[1]")
+        template = template.replace("types[evo[3]].name", "evo[3]")
+        template = template.replace("species[evo[1]].name", "evo[1]")
+        template = template.replace("'move ' + moves[evo[1]].name", "'move ' + evo[1]")
+        template = template.replace("evo[1] !== 101", f"evo[1] !== '{dawn_name}'")
+        data['evolutions'][mid] = template
 
 
 def write_js(path, obj):
@@ -166,6 +236,8 @@ def main():
     parser = argparse.ArgumentParser(description='Normalize and split dataset')
     parser.add_argument('input', nargs='?', default='data.js', help='Input dataset (default data.js)')
     parser.add_argument('-o', '--outdir', default='split_data', help='Output directory')
+    parser.add_argument('--expand-evolutions', action='store_true',
+                        help='Include resolved text for each evolution')
     args = parser.parse_args()
 
     with open(args.input, 'r', encoding='utf-8') as f:
@@ -173,7 +245,7 @@ def main():
 
     # remove sprites then replace id references
     data = remove_sprites(data)
-    replace_ids(data)
+    replace_ids(data, expand_evos=args.expand_evolutions)
 
     os.makedirs(args.outdir, exist_ok=True)
 
