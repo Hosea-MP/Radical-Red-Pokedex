@@ -16,7 +16,16 @@ areas = load_data('areas')
 trainers = load_data('trainers')
 items = load_data('items')
 
-app = Flask(__name__, static_url_path='/static')
+# Mapping from species name to its dex ID for quick lookups
+NAME_TO_ID = {s['name']: s.get('dexID', s.get('ID')) for s in species.values()}
+
+# Serve image assets from the graphics directory so templates can reference
+# sprites directly via ``/graphics/...`` URLs.
+app = Flask(
+    __name__,
+    static_url_path='/graphics',
+    static_folder=os.path.join(BASE_DIR, 'graphics')
+)
 
 @app.route('/')
 def index():
@@ -53,7 +62,11 @@ def trainer_detail(tid):
     t = trainers.get(tid)
     if not t:
         abort(404)
-    return render_template('trainer.html', trainer=t)
+    party = []
+    for mon in t.get('normal', []):
+        dex = NAME_TO_ID.get(mon.get('species'))
+        party.append({**mon, 'dexID': dex})
+    return render_template('trainer.html', trainer=t, party=party)
 
 if __name__ == '__main__':
     app.run(debug=True)
