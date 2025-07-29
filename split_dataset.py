@@ -33,11 +33,34 @@ def build_lookup_tables(data):
     tm_lookup = data.get('tmMoves', {})
     tutor_lookup = data.get('tutorMoves', {})
     species_map = {int(sid): mon.get('name', sid) for sid, mon in data.get('species', {}).items()}
-    return move_map, ability_map, egg_map, tm_lookup, tutor_lookup, species_map
+    type_map = {int(tid): t.get('name', tid) for tid, t in data.get('types', {}).items()}
+    item_map = {int(iid): item.get('name', iid) for iid, item in data.get('items', {}).items()}
+    nature_map = {int(nid): name for nid, name in data.get('natures', {}).items()}
+    return (
+        move_map,
+        ability_map,
+        egg_map,
+        tm_lookup,
+        tutor_lookup,
+        species_map,
+        type_map,
+        item_map,
+        nature_map,
+    )
 
 
 def replace_ids(data):
-    move_map, ability_map, egg_map, tm_lookup, tutor_lookup, species_map = build_lookup_tables(data)
+    (
+        move_map,
+        ability_map,
+        egg_map,
+        tm_lookup,
+        tutor_lookup,
+        species_map,
+        type_map,
+        item_map,
+        nature_map,
+    ) = build_lookup_tables(data)
     for mon in data.get('species', {}).values():
         if 'eggMoves' in mon:
             mon['eggMoves'] = [move_map.get(mid, mid) for mid in mon['eggMoves']]
@@ -53,6 +76,12 @@ def replace_ids(data):
             mon['abilities'] = [[ability_map.get(aid, aid), slot] for aid, slot in mon['abilities']]
         if 'eggGroup' in mon:
             mon['eggGroup'] = [egg_map.get(eid, eid) for eid in mon['eggGroup']]
+        if 'type' in mon:
+            mon['type'] = [type_map.get(t, t) for t in mon['type']]
+        if 'items' in mon:
+            mon['items'] = [item_map.get(i, i) for i in mon['items']]
+        if 'ancestor' in mon and mon['ancestor']:
+            mon['ancestor'] = species_map.get(mon['ancestor'], mon['ancestor'])
         if 'evolutions' in mon:
             converted = []
             for evo in mon['evolutions']:
@@ -61,12 +90,22 @@ def replace_ids(data):
                     evo[2] = species_map.get(evo[2], evo[2])
                 converted.append(evo)
             mon['evolutions'] = converted
+
+    for move in data.get('moves', {}).values():
+        if 'type' in move:
+            move['type'] = type_map.get(move['type'], move['type'])
     for trainer in data.get('trainers', {}).values():
         for mode in ('normal', 'hardcore'):
             if mode in trainer:
                 for poke in trainer[mode]:
                     if 'ability' in poke:
                         poke['ability'] = ability_map.get(poke['ability'], poke['ability'])
+                    if 'species' in poke:
+                        poke['species'] = species_map.get(poke['species'], poke['species'])
+                    if 'nature' in poke:
+                        poke['nature'] = nature_map.get(poke['nature'], poke['nature'])
+                    if 'moves' in poke:
+                        poke['moves'] = [move_map.get(mid, mid) for mid in poke['moves']]
 
 
 def write_js(path, obj):
