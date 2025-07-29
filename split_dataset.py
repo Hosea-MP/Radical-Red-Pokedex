@@ -82,13 +82,12 @@ def main():
 
     os.makedirs(args.outdir, exist_ok=True)
 
-    pieces = ['species', 'moves', 'abilities', 'eggGroups', 'trainers', 'tmMoves', 'tutorMoves']
+    pieces = [k for k in data.keys()]
     index = {}
     for key in pieces:
-        if key in data:
-            path = os.path.join(args.outdir, f'{key}.js')
-            write_js(path, data[key])
-            index[key] = path
+        path = os.path.join(args.outdir, f'{key}.js')
+        write_js(path, data[key])
+        index[key] = path
 
     with open(os.path.join(args.outdir, 'index.json'), 'w', encoding='utf-8') as f:
         json.dump(index, f, indent=2)

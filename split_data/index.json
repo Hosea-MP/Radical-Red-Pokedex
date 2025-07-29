@@ -1,9 +1,17 @@
 {
   "species": "split_data/species.js",
   "moves": "split_data/moves.js",
-  "abilities": "split_data/abilities.js",
-  "eggGroups": "split_data/eggGroups.js",
-  "trainers": "split_data/trainers.js",
   "tmMoves": "split_data/tmMoves.js",
-  "tutorMoves": "split_data/tutorMoves.js"
+  "tutorMoves": "split_data/tutorMoves.js",
+  "types": "split_data/types.js",
+  "abilities": "split_data/abilities.js",
+  "items": "split_data/items.js",
+  "areas": "split_data/areas.js",
+  "trainers": "split_data/trainers.js",
+  "natures": "split_data/natures.js",
+  "eggGroups": "split_data/eggGroups.js",
+  "splits": "split_data/splits.js",
+  "evolutions": "split_data/evolutions.js",
+  "scaledLevels": "split_data/scaledLevels.js",
+  "caps": "split_data/caps.js"
 }
