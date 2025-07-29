@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{{ trainer.name }}</title>
+  </head>
+  <body>
+    <h1>{{ trainer.name }}</h1>
+    <img src="/graphics/trainers/{{ trainer.ID }}.png" alt="{{ trainer.name }}">
+    <h2>Pokemon</h2>
+    {% for poke in party %}
+      <div style="margin-bottom:10px;">
+        <img src="/graphics/species/front/{{ poke.ID }}.png" alt="{{ poke.species }}" style="width:40px;height:40px;vertical-align:middle;">
+        <strong>{{ poke.species }}</strong> Lv {{ poke.level }}<br>
+        Moves: {{ poke.moves|join(', ') }}
+      </div>
+    {% endfor %}
+    <p><a href="/areas">Back to Areas</a></p>
+  </body>
+</html>

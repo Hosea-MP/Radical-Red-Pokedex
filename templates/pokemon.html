@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{{ mon.name }}</title>
+  </head>
+  <body>
+    <h1>{{ mon.name }}</h1>
+    {# Display the sprite using the dex ID with transparency #}
+    <img src="/graphics/species/front/{{ mon.ID }}.png" alt="{{ mon.name }}">
+    <p>Dex ID: {{ mon.dexID }}</p>
+    <p>Type: {{ mon.type|join(', ') }}</p>
+    <p>Stats: {{ mon.stats }}</p>
+    <p><a href="/pokedex">Back to Pokedex</a></p>
+  </body>
+</html>

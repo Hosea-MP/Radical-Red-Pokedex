@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{{ area.name }}</title>
+  </head>
+  <body>
+    <h1>{{ area.name }}</h1>
+    {% if trainers %}
+    <h2>Trainers</h2>
+    {% for slot, tlist in trainers.items() %}
+      <h3>Group {{ slot }}</h3>
+      <ul>
+      {% for t in tlist %}
+        <li><a href="/trainer/{{ t.get('ID', 0) }}">{{ t.get('name') }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endfor %}
+    {% endif %}
+    {% for field, data in area.items() %}
+      {% if field.startswith('wild-') %}
+      <h2>{{ field.replace('wild-','').replace('Rod',' Rod').title() }}</h2>
+      <ul>
+      {% for slot, entries in data.items() %}
+        {% for entry in entries %}
+          <li>{{ entry[0] }} Lv {{ entry[1] }}-{{ entry[2] }}</li>
+        {% endfor %}
+      {% endfor %}
+      </ul>
+      {% elif field.startswith('item-') %}
+      <h2>Items ({{ field }})</h2>
+      <ul>
+      {% for slot, items in data.items() %}
+        {% for item in items %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      {% endfor %}
+      </ul>
+      {% endif %}
+    {% endfor %}
+    <p><a href="/areas">Back to Areas</a></p>
+  </body>
+</html>
