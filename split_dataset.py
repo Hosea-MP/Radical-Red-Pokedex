@@ -76,7 +76,7 @@ def write_js(path, obj):
 
 def main():
     parser = argparse.ArgumentParser(description='Normalize and split dataset')
-    parser.add_argument('input', nargs='?', default='parsed_data.js', help='Input dataset (default parsed_data.js)')
+    parser.add_argument('input', nargs='?', default='data.js', help='Input dataset (default data.js)')
     parser.add_argument('-o', '--outdir', default='split_data', help='Output directory')
     args = parser.parse_args()
 

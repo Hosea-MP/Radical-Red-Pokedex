@@ -1,1 +1,0 @@
-{0: 'Physical', 1: 'Special', 2: 'Status'}
