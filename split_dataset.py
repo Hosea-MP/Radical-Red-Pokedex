@@ -1,8 +1,10 @@
 """Normalize and split the dataset into individual files.
 
-This script removes sprite data, replaces numeric ID references with names
-and species keys,
-and writes each top-level section of the input file to its own JavaScript file.
+This script removes sprite data and converts numeric ID references to
+human-readable forms. Species IDs are replaced with their key value
+where available so trainers and areas reference Pokémon by key.
+Each top-level section of the input file is then written to its own
+JavaScript file.
 An index.json mapping keys to file paths is generated for convenience.
 """
 
@@ -110,6 +112,32 @@ def replace_ids(data):
                         poke['nature'] = nature_map.get(poke['nature'], poke['nature'])
                     if 'moves' in poke:
                         poke['moves'] = [move_map.get(mid, mid) for mid in poke['moves']]
+
+    for area in data.get('areas', []):
+        for field in (
+            'wild-day',
+            'wild-night',
+            'wild-surf',
+            'wild-oldRod',
+            'wild-goodRod',
+            'wild-superRod',
+            'wild-smash',
+        ):
+            if field in area:
+                for slot, encounters in area[field].items():
+                    for entry in encounters:
+                        if entry:
+                            entry[0] = species_map.get(entry[0], entry[0])
+
+        for fixed in (
+            'fixed-gift',
+            'fixed-overworld',
+            'fixed-roaming',
+            'fixed-trade',
+        ):
+            if fixed in area:
+                for slot, mons in area[fixed].items():
+                    area[fixed][slot] = [species_map.get(mid, mid) for mid in mons]
 
 
 def write_js(path, obj):
