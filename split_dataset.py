@@ -7,7 +7,9 @@ Trainer and item references in areas are also replaced with their
 corresponding names. Raid dens use names for their Pokémon and reward
 items as well. Each evolution entry includes the resolved descriptive
 text alongside its numeric parameters so consumers can display the
-final description directly.
+final description directly. TM and tutor move lookup tables also map
+to the move names so individual Pokémon lists no longer contain raw
+IDs.
 Each top-level section of the input file is then written to its own
 JavaScript file.
 An index.json mapping keys to file paths is generated for convenience.
@@ -214,6 +216,16 @@ def replace_ids(data, expand_evos=True):
                         reward_names = [item_map.get(rid, rid) for rid in rewards]
                         converted.append([mon_name, reward_names])
                     area[key][slot] = converted
+
+    # rewrite TM and tutor move tables so indexes point to move names
+    if 'tmMoves' in data:
+        data['tmMoves'] = {
+            int(idx): move_map.get(mid, mid) for idx, mid in data['tmMoves'].items()
+        }
+    if 'tutorMoves' in data:
+        data['tutorMoves'] = {
+            int(idx): move_map.get(mid, mid) for idx, mid in data['tutorMoves'].items()
+        }
 
     dawn_name = item_map.get(101, 'Dawn Stone')
     for mid, template in data.get('evolutions', {}).items():
