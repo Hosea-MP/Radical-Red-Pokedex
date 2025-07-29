@@ -16,7 +16,7 @@
         const list = document.getElementById('pokedex');
         for (const mon of mons) {
           const li = document.createElement('li');
-          li.innerHTML = `<img src="/graphics/${mon.dexID}.png" alt="${mon.name}" style="width:40px;height:40px;vertical-align:middle;"> ` +
+          li.innerHTML = `<img src="/graphics/species/front/${mon.dexID}.png" alt="${mon.name}" style="width:40px;height:40px;vertical-align:middle;"> ` +
                          `<a href="/pokemon/${mon.dexID}">${mon.dexID} - ${mon.name}</a>`;
           list.appendChild(li);
         }
