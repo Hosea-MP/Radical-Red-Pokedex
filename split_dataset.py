@@ -3,6 +3,8 @@
 This script removes sprite data and converts numeric ID references to
 human-readable forms. Species IDs are replaced with their key value
 where available so trainers and areas reference Pokémon by key.
+Trainer and item references in areas are also replaced with their
+corresponding names.
 Each top-level section of the input file is then written to its own
 JavaScript file.
 An index.json mapping keys to file paths is generated for convenience.
@@ -39,6 +41,10 @@ def build_lookup_tables(data):
         int(sid): mon.get('key') or mon.get('name', sid)
         for sid, mon in data.get('species', {}).items()
     }
+    trainer_map = {
+        int(tid): t.get('name', tid)
+        for tid, t in data.get('trainers', {}).items()
+    }
     type_map = {int(tid): t.get('name', tid) for tid, t in data.get('types', {}).items()}
     item_map = {int(iid): item.get('name', iid) for iid, item in data.get('items', {}).items()}
     nature_map = {int(nid): name for nid, name in data.get('natures', {}).items()}
@@ -49,6 +55,7 @@ def build_lookup_tables(data):
         tm_lookup,
         tutor_lookup,
         species_map,
+        trainer_map,
         type_map,
         item_map,
         nature_map,
@@ -63,6 +70,7 @@ def replace_ids(data):
         tm_lookup,
         tutor_lookup,
         species_map,
+        trainer_map,
         type_map,
         item_map,
         nature_map,
@@ -138,6 +146,15 @@ def replace_ids(data):
             if fixed in area:
                 for slot, mons in area[fixed].items():
                     area[fixed][slot] = [species_map.get(mid, mid) for mid in mons]
+
+        if 'trainers' in area:
+            for slot, ids in area['trainers'].items():
+                area['trainers'][slot] = [trainer_map.get(tid, tid) for tid in ids]
+
+        for key in list(area.keys()):
+            if key.startswith('item-'):
+                for slot, items in area[key].items():
+                    area[key][slot] = [item_map.get(iid, iid) for iid in items]
 
 
 def write_js(path, obj):
