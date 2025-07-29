@@ -101,9 +101,25 @@ def replace_ids(data):
         if 'evolutions' in mon:
             converted = []
             for evo in mon['evolutions']:
+                evo = list(evo)
                 if len(evo) >= 3:
-                    evo = list(evo)
                     evo[2] = species_map.get(evo[2], evo[2])
+                method = evo[0]
+                if method == 7:
+                    evo[1] = item_map.get(evo[1], evo[1])
+                elif method == 17:
+                    evo[1] = type_map.get(evo[1], evo[1])
+                elif method == 18 and len(evo) > 3:
+                    evo[3] = type_map.get(evo[3], evo[3])
+                elif method == 26:
+                    evo[1] = move_map.get(evo[1], evo[1])
+                elif method == 27:
+                    evo[1] = species_map.get(evo[1], evo[1])
+                elif method == 254:
+                    if len(evo) > 3 and evo[3] == 2:
+                        evo[1] = move_map.get(evo[1], evo[1])
+                    else:
+                        evo[1] = item_map.get(evo[1], evo[1])
                 converted.append(evo)
             mon['evolutions'] = converted
 
@@ -165,6 +181,17 @@ def replace_ids(data):
                         reward_names = [item_map.get(rid, rid) for rid in rewards]
                         converted.append([mon_name, reward_names])
                     area[key][slot] = converted
+
+    dawn_name = item_map.get(101, 'Dawn Stone')
+    for mid, template in data.get('evolutions', {}).items():
+        template = template.replace("items[evo[1]].name", "evo[1]")
+        template = template.replace("moves[evo[1]].name", "evo[1]")
+        template = template.replace("types[evo[1]].name", "evo[1]")
+        template = template.replace("types[evo[3]].name", "evo[3]")
+        template = template.replace("species[evo[1]].name", "evo[1]")
+        template = template.replace("'move ' + moves[evo[1]].name", "'move ' + evo[1]")
+        template = template.replace("evo[1] !== 101", f"evo[1] !== '{dawn_name}'")
+        data['evolutions'][mid] = template
 
 
 def write_js(path, obj):
