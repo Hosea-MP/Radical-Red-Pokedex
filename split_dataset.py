@@ -4,7 +4,8 @@ This script removes sprite data and converts numeric ID references to
 human-readable forms. Species IDs are replaced with their key value
 where available so trainers and areas reference Pokémon by key.
 Trainer and item references in areas are also replaced with their
-corresponding names.
+corresponding names. Raid dens use names for their Pokémon and reward
+items as well.
 Each top-level section of the input file is then written to its own
 JavaScript file.
 An index.json mapping keys to file paths is generated for convenience.
@@ -14,6 +15,7 @@ import ast
 import os
 import json
 import argparse
+import re
 
 
 def remove_sprites(obj):
@@ -155,6 +157,14 @@ def replace_ids(data):
             if key.startswith('item-'):
                 for slot, items in area[key].items():
                     area[key][slot] = [item_map.get(iid, iid) for iid in items]
+            elif re.fullmatch(r"raid\d+", key):
+                for slot, entries in area[key].items():
+                    converted = []
+                    for mon_id, rewards in entries:
+                        mon_name = species_map.get(mon_id, mon_id)
+                        reward_names = [item_map.get(rid, rid) for rid in rewards]
+                        converted.append([mon_name, reward_names])
+                    area[key][slot] = converted
 
 
 def write_js(path, obj):
