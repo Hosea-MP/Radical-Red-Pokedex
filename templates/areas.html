@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Areas</title>
+  </head>
+  <body>
+    <h1>Areas</h1>
+    <ul>
+    {% for area in areas %}
+      <li><a href="/areas/{{ loop.index0 }}">{{ area.name }}</a></li>
+    {% endfor %}
+    </ul>
+    <p><a href="/">Back</a></p>
+  </body>
+</html>
