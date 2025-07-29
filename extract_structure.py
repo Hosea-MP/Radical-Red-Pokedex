@@ -9,16 +9,25 @@ def traverse(obj, prefix=""):
             if keys:
                 first = keys[0]
                 new_prefix = f"{prefix}.[item]" if prefix else "[item]"
-                print(new_prefix)
+                try:
+                    print(new_prefix)
+                except BrokenPipeError:
+                    sys.exit(0)
                 traverse(obj[first], new_prefix)
             return
         for key, val in obj.items():
             new_prefix = f"{prefix}.{key}" if prefix else str(key)
-            print(new_prefix)
+            try:
+                print(new_prefix)
+            except BrokenPipeError:
+                sys.exit(0)
             traverse(val, new_prefix)
     elif isinstance(obj, list) and obj:
         new_prefix = prefix + "[]"
-        print(new_prefix)
+        try:
+            print(new_prefix)
+        except BrokenPipeError:
+            sys.exit(0)
         traverse(obj[0], new_prefix)
 
 
@@ -29,7 +38,10 @@ def main():
     with open(sys.argv[1], 'r', encoding='utf-8') as f:
         data = f.read()
     obj = ast.literal_eval(data)
-    traverse(obj)
+    try:
+        traverse(obj)
+    except BrokenPipeError:
+        pass
 
 if __name__ == '__main__':
     main()
