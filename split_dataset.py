@@ -1,3 +1,10 @@
+"""Normalize and split the dataset into individual files.
+
+This script removes sprite data, replaces numeric ID references with names,
+and writes each top-level section of the input file to its own JavaScript file.
+An index.json mapping keys to file paths is generated for convenience.
+"""
+
 import ast
 import os
 import json
@@ -82,7 +89,8 @@ def main():
 
     os.makedirs(args.outdir, exist_ok=True)
 
-    pieces = [k for k in data.keys()]
+    # gather all top level keys so we emit every section
+    pieces = sorted(data.keys())
     index = {}
     for key in pieces:
         path = os.path.join(args.outdir, f'{key}.js')
