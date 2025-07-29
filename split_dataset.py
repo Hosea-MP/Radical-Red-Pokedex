@@ -5,9 +5,9 @@ human-readable forms. Species IDs are replaced with their key value
 where available so trainers and areas reference Pokémon by key.
 Trainer and item references in areas are also replaced with their
 corresponding names. Raid dens use names for their Pokémon and reward
-items as well. When ``--expand-evolutions`` is used each evolution entry
-includes the resolved descriptive text in addition to its numeric
-parameters.
+items as well. Each evolution entry includes the resolved descriptive
+text alongside its numeric parameters so consumers can display the
+final description directly.
 Each top-level section of the input file is then written to its own
 JavaScript file.
 An index.json mapping keys to file paths is generated for convenience.
@@ -94,7 +94,7 @@ def build_lookup_tables(data):
     )
 
 
-def replace_ids(data, expand_evos=False):
+def replace_ids(data, expand_evos=True):
     (
         move_map,
         ability_map,
@@ -236,8 +236,6 @@ def main():
     parser = argparse.ArgumentParser(description='Normalize and split dataset')
     parser.add_argument('input', nargs='?', default='data.js', help='Input dataset (default data.js)')
     parser.add_argument('-o', '--outdir', default='split_data', help='Output directory')
-    parser.add_argument('--expand-evolutions', action='store_true',
-                        help='Include resolved text for each evolution')
     args = parser.parse_args()
 
     with open(args.input, 'r', encoding='utf-8') as f:
@@ -245,7 +243,7 @@ def main():
 
     # remove sprites then replace id references
     data = remove_sprites(data)
-    replace_ids(data, expand_evos=args.expand_evolutions)
+    replace_ids(data, expand_evos=True)
 
     os.makedirs(args.outdir, exist_ok=True)
 
