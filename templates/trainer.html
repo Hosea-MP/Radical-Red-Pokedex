@@ -9,7 +9,7 @@
     <h2>Pokemon</h2>
     {% for poke in party %}
       <div style="margin-bottom:10px;">
-        <img src="/graphics/species/front/{{ poke.dexID }}.png" alt="{{ poke.species }}" style="width:40px;height:40px;vertical-align:middle;">
+        <img src="/graphics/{{ poke.dexID }}.png" alt="{{ poke.species }}" style="width:40px;height:40px;vertical-align:middle;">
         <strong>{{ poke.species }}</strong> Lv {{ poke.level }}<br>
         Moves: {{ poke.moves|join(', ') }}
       </div>

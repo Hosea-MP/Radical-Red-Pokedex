@@ -1,6 +1,6 @@
 import ast
 import os
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, jsonify, request
 
 # Load data
 BASE_DIR = os.path.dirname(__file__)
@@ -31,10 +31,22 @@ app = Flask(
 def index():
     return render_template('index.html')
 
+# Precompute a sorted list for pagination
+MON_LIST = sorted(species.values(), key=lambda m: m['dexID'])
+
 @app.route('/pokedex')
 def pokedex():
-    mons = sorted(species.values(), key=lambda m: m['dexID'])
-    return render_template('pokedex.html', mons=mons)
+    return render_template('pokedex.html')
+
+@app.route('/api/pokemon')
+def api_pokemon():
+    try:
+        offset = int(request.args.get('offset', 0))
+        limit = int(request.args.get('limit', 50))
+    except ValueError:
+        abort(400)
+    slice_ = MON_LIST[offset:offset + limit]
+    return jsonify(slice_)
 
 @app.route('/pokemon/<int:dex_id>')
 def pokemon(dex_id):
