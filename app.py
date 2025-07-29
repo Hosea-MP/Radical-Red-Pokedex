@@ -16,8 +16,14 @@ areas = load_data('areas')
 trainers = load_data('trainers')
 items = load_data('items')
 
+<<<<<<< HEAD
 # Mapping from species name to its dex ID for quick lookups
 NAME_TO_ID = {s['name']: s.get('dexID', s.get('ID')) for s in species.values()}
+=======
+# Mapping from species key to its unique species ID for quick lookups
+# This lets us resolve forms such as "Pikachu-Surfing" correctly.
+NAME_TO_ID = {s.get('key', s['name']): s['ID'] for s in species.values()}
+>>>>>>> 2m0rit-codex/create-pokedex-viewer-web-application
 
 # Serve image assets from the graphics directory so templates can reference
 # sprites directly via ``/graphics/...`` URLs.
@@ -48,9 +54,16 @@ def api_pokemon():
     slice_ = MON_LIST[offset:offset + limit]
     return jsonify(slice_)
 
+<<<<<<< HEAD
 @app.route('/pokemon/<int:dex_id>')
 def pokemon(dex_id):
     mon = next((m for m in species.values() if m['dexID'] == dex_id), None)
+=======
+@app.route('/pokemon/<int:species_id>')
+def pokemon(species_id):
+    """Display details for a single species/form by its unique ID."""
+    mon = species.get(species_id)
+>>>>>>> 2m0rit-codex/create-pokedex-viewer-web-application
     if not mon:
         abort(404)
     return render_template('pokemon.html', mon=mon)
@@ -76,8 +89,13 @@ def trainer_detail(tid):
         abort(404)
     party = []
     for mon in t.get('normal', []):
+<<<<<<< HEAD
         dex = NAME_TO_ID.get(mon.get('species'))
         party.append({**mon, 'dexID': dex})
+=======
+        sid = NAME_TO_ID.get(mon.get('species'))
+        party.append({**mon, 'ID': sid})
+>>>>>>> 2m0rit-codex/create-pokedex-viewer-web-application
     return render_template('trainer.html', trainer=t, party=party)
 
 if __name__ == '__main__':

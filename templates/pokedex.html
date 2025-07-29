@@ -16,8 +16,13 @@
         const list = document.getElementById('pokedex');
         for (const mon of mons) {
           const li = document.createElement('li');
+<<<<<<< HEAD
           li.innerHTML = `<img src="/graphics/species/front/${mon.dexID}.png" alt="${mon.name}" style="width:40px;height:40px;vertical-align:middle;"> ` +
                          `<a href="/pokemon/${mon.dexID}">${mon.dexID} - ${mon.name}</a>`;
+=======
+          li.innerHTML = `<img src="/graphics/species/front/${mon.ID}.png" alt="${mon.name}" style="width:40px;height:40px;vertical-align:middle;"> ` +
+                         `<a href="/pokemon/${mon.ID}">${mon.dexID} - ${mon.name}</a>`;
+>>>>>>> 2m0rit-codex/create-pokedex-viewer-web-application
           list.appendChild(li);
         }
         if (mons.length) {
