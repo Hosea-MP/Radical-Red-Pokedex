@@ -16,14 +16,9 @@ areas = load_data('areas')
 trainers = load_data('trainers')
 items = load_data('items')
 
-<<<<<<< HEAD
-# Mapping from species name to its dex ID for quick lookups
-NAME_TO_ID = {s['name']: s.get('dexID', s.get('ID')) for s in species.values()}
-=======
 # Mapping from species key to its unique species ID for quick lookups
 # This lets us resolve forms such as "Pikachu-Surfing" correctly.
 NAME_TO_ID = {s.get('key', s['name']): s['ID'] for s in species.values()}
->>>>>>> 2m0rit-codex/create-pokedex-viewer-web-application
 
 # Serve image assets from the graphics directory so templates can reference
 # sprites directly via ``/graphics/...`` URLs.
