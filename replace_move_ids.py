@@ -25,6 +25,9 @@ egg_map = {int(eid): name for eid, name in data.get('eggGroups', {}).items()}
 tutor_lookup = data.get('tutorMoves', {})
 tm_lookup = data.get('tmMoves', {})
 
+# Map of species ID -> species name for evolution conversions
+species_map = {int(sid): mon.get('name', sid) for sid, mon in data.get('species', {}).items()}
+
 for mon in data.get('species', {}).values():
     if 'eggMoves' in mon:
         mon['eggMoves'] = [move_map.get(mid, mid) for mid in mon['eggMoves']]
@@ -45,6 +48,15 @@ for mon in data.get('species', {}).values():
 
     if 'eggGroup' in mon:
         mon['eggGroup'] = [egg_map.get(eid, eid) for eid in mon['eggGroup']]
+
+    if 'evolutions' in mon:
+        converted = []
+        for evo in mon['evolutions']:
+            if len(evo) >= 3:
+                evo = list(evo)
+                evo[2] = species_map.get(evo[2], evo[2])
+            converted.append(evo)
+        mon['evolutions'] = converted
 
 # Update trainer Pokemon abilities
 for trainer in data.get('trainers', {}).values():
