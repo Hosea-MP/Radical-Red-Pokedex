@@ -6,7 +6,7 @@
   <body>
     <h1>{{ mon.name }}</h1>
     {# Display the sprite using the dex ID with transparency #}
-    <img src="/graphics/species/front/{{ mon.ID }}.png" alt="{{ mon.name }}">
+    <img src="/sprites/species/front/{{ mon.ID }}.png" alt="{{ mon.name }}">
     <p>Dex ID: {{ mon.dexID }}</p>
     <p>Type: {{ mon.type|join(', ') }}</p>
     <p>Stats: {{ mon.stats }}</p>
