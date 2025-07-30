@@ -20,6 +20,16 @@ areas = load_data('areas')
 trainers = load_data('trainers')
 items = load_data('items')
 
+# Precompute list of all sprite URLs for caching
+SPRITE_DIR = os.path.join(BASE_DIR, 'graphics')
+SPRITE_LIST = []
+for root, _, files in os.walk(SPRITE_DIR):
+    for name in files:
+        if not name.lower().endswith('.png'):
+            continue
+        rel = os.path.relpath(os.path.join(root, name), SPRITE_DIR)
+        SPRITE_LIST.append('/sprites/' + rel.replace('\\', '/'))
+
 # Helper mapping from trainer name to ID for resolving trainers listed by name
 TRAINER_NAME_TO_ID = {t['name']: t['ID'] for t in trainers.values()}
 
@@ -59,6 +69,16 @@ def sprites(filename):
     if not os.path.isfile(path):
         abort(404)
     return send_file(io.BytesIO(load_sprite(path)), mimetype='image/png')
+
+# Endpoint providing list of all sprite URLs for client-side caching
+@app.route('/sprite_list')
+def sprite_list():
+    return jsonify(SPRITE_LIST)
+
+# Serve the service worker script
+@app.route('/sw.js')
+def service_worker():
+    return app.send_static_file('sw.js')
 
 @app.route('/')
 def index():

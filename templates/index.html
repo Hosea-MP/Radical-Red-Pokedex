@@ -2,12 +2,48 @@
 <html>
   <head>
     <title>Radical Red Pokedex Viewer</title>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js', {scope: '/'});
+      }
+    </script>
+    <style>
+      #loading { display: none; font-size: 20px; }
+    </style>
   </head>
   <body>
-    <h1>Radical Red Pokedex Viewer</h1>
-    <ul>
-      <li><a href="/pokedex">Pokedex</a></li>
-      <li><a href="/areas">Areas</a></li>
-    </ul>
+    <div id="loading">Caching sprites: <span id="progress">0</span>%</div>
+    <div id="main" style="display:none;">
+      <h1>Radical Red Pokedex Viewer</h1>
+      <ul>
+        <li><a href="/pokedex">Pokedex</a></li>
+        <li><a href="/areas">Areas</a></li>
+      </ul>
+    </div>
+    <script>
+      async function cacheSprites() {
+        const res = await fetch('/sprite_list');
+        const files = await res.json();
+        const cache = await caches.open('sprite-cache');
+        let count = 0;
+        for (const url of files) {
+          await cache.add(url);
+          count++;
+          document.getElementById('progress').textContent = Math.floor(count / files.length * 100);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        const main = document.getElementById('main');
+        const loading = document.getElementById('loading');
+        if (!localStorage.getItem('spritesCached')) {
+          loading.style.display = 'block';
+          await cacheSprites();
+          localStorage.setItem('spritesCached', 'true');
+        }
+        loading.style.display = 'none';
+        main.style.display = 'block';
+      });
+    </script>
   </body>
 </html>
