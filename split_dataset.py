@@ -20,7 +20,6 @@ import os
 import json
 import argparse
 import re
-from PIL import Image
 
 
 def format_evo_text(method_id, evo, templates):
@@ -60,21 +59,19 @@ def remove_sprites(obj):
     return obj
 
 
-def make_transparent(path: str) -> None:
-    """Convert the sprite background color to transparency."""
-    im = Image.open(path).convert("RGBA")
-    bg = im.getpixel((0, 0))
-    pixels = [(*px[:3], 0) if px[:3] == bg[:3] else px for px in im.getdata()]
-    im.putdata(pixels)
-    im.save(path)
+# Sprite transparency is now handled dynamically by the Flask application, so
+# this script no longer processes image files. The previous PIL-based helpers
+# remain here for reference but are unused.
 
 
-def fix_sprite_transparency(base: str) -> None:
-    """Apply transparency fix to all PNGs under *base* directory."""
-    for root, _, files in os.walk(base):
-        for name in files:
-            if name.lower().endswith(".png"):
-                make_transparent(os.path.join(root, name))
+def make_transparent(path: str) -> None:  # pragma: no cover - legacy helper
+    """Convert the sprite background color to transparency (unused)."""
+    pass
+
+
+def fix_sprite_transparency(base: str) -> None:  # pragma: no cover - legacy
+    """Placeholder for legacy transparency processing (unused)."""
+    pass
 
 
 def build_lookup_tables(data):
@@ -275,10 +272,7 @@ def main():
     data = remove_sprites(data)
     replace_ids(data, expand_evos=True)
 
-    # ensure sprite backgrounds are transparent before packaging
-    base_dir = os.path.join(os.path.dirname(__file__), 'graphics')
-    if os.path.isdir(base_dir):
-        fix_sprite_transparency(base_dir)
+    # Sprite transparency is processed at runtime by the Flask application
 
     os.makedirs(args.outdir, exist_ok=True)
 

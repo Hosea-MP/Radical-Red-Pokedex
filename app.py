@@ -1,6 +1,9 @@
 import ast
 import os
-from flask import Flask, render_template, abort, jsonify, request
+import io
+import numpy as np
+import imageio.v2 as iio
+from flask import Flask, render_template, abort, jsonify, request, send_file
 
 # Load data
 BASE_DIR = os.path.dirname(__file__)
@@ -20,13 +23,37 @@ items = load_data('items')
 # This lets us resolve forms such as "Pikachu-Surfing" correctly.
 NAME_TO_ID = {s.get('key', s['name']): s['ID'] for s in species.values()}
 
-# Serve image assets from the graphics directory so templates can reference
-# sprites directly via ``/graphics/...`` URLs.
+# Images live in the ``graphics`` directory but are processed on the fly. The
+# ``/sprites`` route serves them with transparency applied.
 app = Flask(
     __name__,
     static_url_path='/graphics',
     static_folder=os.path.join(BASE_DIR, 'graphics')
 )
+
+
+def load_sprite(path: str) -> io.BytesIO:
+    """Return PNG bytes for *path* with background color made transparent."""
+    img = iio.imread(path)
+    if img.ndim == 2:  # grayscale
+        img = np.dstack([img, img, img, np.full_like(img, 255)])
+    elif img.shape[2] == 3:
+        img = np.dstack([img, np.full(img.shape[:2], 255, dtype=img.dtype)])
+    bg = img[0, 0, :3]
+    mask = (img[:, :, :3] == bg).all(axis=-1)
+    img[mask, 3] = 0
+    buf = io.BytesIO()
+    iio.imwrite(buf, img, format='png')
+    buf.seek(0)
+    return buf
+
+
+@app.route('/sprites/<path:filename>')
+def sprites(filename):
+    path = os.path.join(BASE_DIR, 'graphics', filename)
+    if not os.path.isfile(path):
+        abort(404)
+    return send_file(load_sprite(path), mimetype='image/png')
 
 @app.route('/')
 def index():
