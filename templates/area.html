@@ -13,10 +13,19 @@
         {% for t in tlist %}
           <li>
             {% if t.get('ID') %}
+<<<<<<< ours
             <img src="/sprites/trainers/{{ t.get('ID') }}.png" alt="{{ t.get('name') }}"
                  style="width:40px;height:40px;vertical-align:middle;">
             {% endif %}
             <a href="/trainer/{{ t.get('ID', 0) }}">{{ t.get('name') }}</a>
+=======
+              <img src="/sprites/trainers/{{ t.ID }}.png" alt="{{ t.name }}"
+                   style="width:40px;height:40px;vertical-align:middle;">
+              <a href="/trainer/{{ t.ID }}">{{ t.name }}</a>
+            {% else %}
+              {{ t.name }}
+            {% endif %}
+>>>>>>> theirs
           </li>
         {% endfor %}
       </ul>
