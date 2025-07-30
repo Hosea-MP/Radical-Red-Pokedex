@@ -20,6 +20,7 @@ import os
 import json
 import argparse
 import re
+from PIL import Image
 
 
 def format_evo_text(method_id, evo, templates):
@@ -57,6 +58,23 @@ def remove_sprites(obj):
     if isinstance(obj, list):
         return [remove_sprites(v) for v in obj]
     return obj
+
+
+def make_transparent(path: str) -> None:
+    """Convert the sprite background color to transparency."""
+    im = Image.open(path).convert("RGBA")
+    bg = im.getpixel((0, 0))
+    pixels = [(*px[:3], 0) if px[:3] == bg[:3] else px for px in im.getdata()]
+    im.putdata(pixels)
+    im.save(path)
+
+
+def fix_sprite_transparency(base: str) -> None:
+    """Apply transparency fix to all PNGs under *base* directory."""
+    for root, _, files in os.walk(base):
+        for name in files:
+            if name.lower().endswith(".png"):
+                make_transparent(os.path.join(root, name))
 
 
 def build_lookup_tables(data):
@@ -256,6 +274,11 @@ def main():
     # remove sprites then replace id references
     data = remove_sprites(data)
     replace_ids(data, expand_evos=True)
+
+    # ensure sprite backgrounds are transparent before packaging
+    base_dir = os.path.join(os.path.dirname(__file__), 'graphics')
+    if os.path.isdir(base_dir):
+        fix_sprite_transparency(base_dir)
 
     os.makedirs(args.outdir, exist_ok=True)
 
