@@ -43,7 +43,8 @@ def load_sprite(path: str) -> io.BytesIO:
     elif img.shape[2] == 3:
         img = np.dstack([img, np.full(img.shape[:2], 255, dtype=img.dtype)])
     bg = img[0, 0, :3]
-    mask = (img[:, :, :3] == bg).all(axis=-1)
+    # Allow small variation in background color to account for GIF artifacts
+    mask = np.all(np.abs(img[:, :, :3] - bg) <= 1, axis=-1)
     img[mask, 3] = 0
     buf = io.BytesIO()
     iio.imwrite(buf, img, format='png')
