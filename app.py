@@ -69,7 +69,7 @@ MON_LIST = sorted(species.values(), key=lambda m: m['dexID'])
 
 @app.route('/pokedex')
 def pokedex():
-    return render_template('pokedex.html')
+    return render_template('pokedex.html', mons=MON_LIST)
 
 @app.route('/api/pokemon')
 def api_pokemon():
