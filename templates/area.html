@@ -13,11 +13,6 @@
         {% for t in tlist %}
           <li>
             {% if t.get('ID') %}
-<<<<<<< ours
-              <img src="/sprites/trainers/{{ t.ID }}.png" alt="{{ t.name }}"
-                   style="width:40px;height:40px;vertical-align:middle;">
-=======
->>>>>>> theirs
               <a href="/trainer/{{ t.ID }}">{{ t.name }}</a>
             {% else %}
               {{ t.name }}
