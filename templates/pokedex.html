@@ -5,32 +5,14 @@
   </head>
   <body>
     <h1>Pokedex</h1>
-    <ul id="pokedex"></ul>
+    <ul id="pokedex">
+    {% for mon in mons %}
+      <li>
+        <img src="/sprites/species/front/{{ mon.ID }}.png" alt="{{ mon.key }}" style="width:40px;height:40px;vertical-align:middle;"> 
+        <a href="/pokemon/{{ mon.ID }}">{{ mon.dexID }} - {{ mon.key }}</a>
+      </li>
+    {% endfor %}
+    </ul>
     <p><a href="/">Back</a></p>
-    <script>
-      let offset = 0;
-      const limit = 50;
-      async function loadMore() {
-        const res = await fetch(`/api/pokemon?offset=${offset}&limit=${limit}`);
-        const mons = await res.json();
-        const list = document.getElementById('pokedex');
-        for (const mon of mons) {
-          const li = document.createElement('li');
-          li.innerHTML = `<img src="/sprites/species/front/${mon.ID}.png" alt="${mon.key}" style="width:40px;height:40px;vertical-align:middle;"> ` +
-                         `<a href="/pokemon/${mon.ID}">${mon.dexID} - ${mon.key}</a>`;
-          list.appendChild(li);
-        }
-        if (mons.length) {
-          offset += mons.length;
-        }
-      }
-
-      window.addEventListener('scroll', () => {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-          loadMore();
-        }
-      });
-      loadMore();
-    </script>
   </body>
 </html>
