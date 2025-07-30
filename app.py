@@ -96,7 +96,22 @@ def area_detail(idx):
     def resolve_trainers(ids):
         return [trainers.get(tid, {'name': tid}) for tid in ids]
     trainer_groups = {slot: resolve_trainers(ids) for slot, ids in area.get('trainers', {}).items()}
-    return render_template('area.html', area=area, trainers=trainer_groups)
+
+    processed = {}
+    for key, value in area.items():
+        if key.startswith('wild-'):
+            new_slots = {}
+            for slot, entries in value.items():
+                new_entries = []
+                for entry in entries:
+                    sid = NAME_TO_ID.get(entry[0])
+                    new_entries.append({'name': entry[0], 'min': entry[1], 'max': entry[2], 'ID': sid})
+                new_slots[slot] = new_entries
+            processed[key] = new_slots
+        else:
+            processed[key] = value
+
+    return render_template('area.html', area=processed, trainers=trainer_groups)
 
 @app.route('/trainer/<int:tid>')
 def trainer_detail(tid):

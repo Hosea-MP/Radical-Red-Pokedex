@@ -22,7 +22,13 @@
       <ul>
       {% for slot, entries in data.items() %}
         {% for entry in entries %}
-          <li>{{ entry[0] }} Lv {{ entry[1] }}-{{ entry[2] }}</li>
+          <li>
+            <a href="/pokemon/{{ entry.ID }}">
+              <img src="/sprites/species/front/{{ entry.ID }}.png" alt="{{ entry.name }}" style="width:40px;height:40px;vertical-align:middle;">
+              {{ entry.name }}
+            </a>
+            Lv {{ entry.min }}-{{ entry.max }}
+          </li>
         {% endfor %}
       {% endfor %}
       </ul>
