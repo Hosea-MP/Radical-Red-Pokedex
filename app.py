@@ -19,6 +19,9 @@ areas = load_data('areas')
 trainers = load_data('trainers')
 items = load_data('items')
 
+# Helper mapping from trainer name to ID for resolving trainers listed by name
+TRAINER_NAME_TO_ID = {t['name']: t['ID'] for t in trainers.values()}
+
 # Mapping from species key to its unique species ID for quick lookups
 # This lets us resolve forms such as "Pikachu-Surfing" correctly.
 NAME_TO_ID = {s.get('key', s['name']): s['ID'] for s in species.values()}
@@ -94,7 +97,19 @@ def area_detail(idx):
         abort(404)
     area = areas[idx]
     def resolve_trainers(ids):
-        return [trainers.get(tid, {'name': tid}) for tid in ids]
+        resolved = []
+        for tid in ids:
+            trainer = None
+            if isinstance(tid, int):
+                trainer = trainers.get(tid)
+            else:
+                t_id = TRAINER_NAME_TO_ID.get(tid)
+                if t_id is not None:
+                    trainer = trainers.get(t_id)
+            if not trainer:
+                trainer = {'name': tid}
+            resolved.append(trainer)
+        return resolved
     trainer_groups = {slot: resolve_trainers(ids) for slot, ids in area.get('trainers', {}).items()}
 
     processed = {}
