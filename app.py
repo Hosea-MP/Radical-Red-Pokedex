@@ -4,6 +4,7 @@ import io
 import numpy as np
 import imageio.v2 as iio
 from flask import Flask, render_template, abort, jsonify, request, send_file
+from functools import lru_cache
 
 # Load data
 BASE_DIR = os.path.dirname(__file__)
@@ -35,8 +36,9 @@ app = Flask(
 )
 
 
-def load_sprite(path: str) -> io.BytesIO:
-    """Return PNG bytes for *path* with background color made transparent."""
+@lru_cache(maxsize=None)
+def load_sprite(path: str) -> bytes:
+    """Return PNG data for *path* with background color made transparent."""
     img = iio.imread(path)
     if img.ndim == 2:  # grayscale
         img = np.dstack([img, img, img, np.full_like(img, 255)])
@@ -48,8 +50,7 @@ def load_sprite(path: str) -> io.BytesIO:
     img[mask, 3] = 0
     buf = io.BytesIO()
     iio.imwrite(buf, img, format='png')
-    buf.seek(0)
-    return buf
+    return buf.getvalue()
 
 
 @app.route('/sprites/<path:filename>')
@@ -57,7 +58,7 @@ def sprites(filename):
     path = os.path.join(BASE_DIR, 'graphics', filename)
     if not os.path.isfile(path):
         abort(404)
-    return send_file(load_sprite(path), mimetype='image/png')
+    return send_file(io.BytesIO(load_sprite(path)), mimetype='image/png')
 
 @app.route('/')
 def index():
